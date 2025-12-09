@@ -1,0 +1,5 @@
+/Users/h2seo/codespace/maven-plugins/rewrite-prepare-maven-plugin/src/test/java/com/yourcompany/plugins/rewriteprepare/service/RecipeListUpdaterTest.java
+/Users/h2seo/codespace/maven-plugins/rewrite-prepare-maven-plugin/src/test/java/com/yourcompany/plugins/rewriteprepare/RewritePrepareMojoTest.java
+/Users/h2seo/codespace/maven-plugins/rewrite-prepare-maven-plugin/src/test/java/com/yourcompany/plugins/rewriteprepare/service/YamlParserTest.java
+/Users/h2seo/codespace/maven-plugins/rewrite-prepare-maven-plugin/src/test/java/com/yourcompany/plugins/rewriteprepare/service/RecipeMergerTest.java
+/Users/h2seo/codespace/maven-plugins/rewrite-prepare-maven-plugin/src/test/java/com/yourcompany/plugins/rewriteprepare/service/PatternMatcherTest.java

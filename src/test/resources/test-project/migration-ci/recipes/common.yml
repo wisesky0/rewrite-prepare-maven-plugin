@@ -1,0 +1,44 @@
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: com.example.CommonRecipe
+displayName: General Purpose Recipe
+description: A generic common recipe applicable to multiple services
+recipeList:
+  - com.example.SharedStepA
+  - com.example.SharedStepB
+
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: com.example.Recipe20
+displayName: Service-wide Operation 20
+description: Performs the 20th standard operation across services
+recipeList:
+  - com.example.SharedStepC
+  - com.example.CommonRecipe1
+
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: com.example.Recipe11
+displayName: Ancillary Service Recipe 11
+description: Handles auxiliary logic for recipe 11 in all services
+recipeList:
+  - com.example.CommonRecipe2
+  - com.example.SharedStepB
+
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: com.example.Recipe9
+displayName: Maintenance Routine 9
+description: Regular maintenance routine applied as recipe 9
+recipeList:
+  - com.example.SharedStepA
+  - com.example.SharedStepD
+
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: com.example.Recipe6
+displayName: Preprocessing Steps Set 6
+description: Collection of preprocessing steps (set 6) for service onboarding
+recipeList:
+  - com.example.CommonRecipe2
+  - com.example.SharedStepC

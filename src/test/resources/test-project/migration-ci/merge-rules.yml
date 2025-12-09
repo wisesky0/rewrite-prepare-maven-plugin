@@ -1,0 +1,38 @@
+rules:
+  - artifactId: my-service
+    groupId: com.example
+    mergeFiles:
+      - base.yml
+      - my-service.yml
+    updateRecipeList:
+      name: com.example.Main
+      updateOrder:
+        - first:
+          - com.example.Recipe1
+        - last:
+          - com.example.Recipe10
+          - com.example.Recipe4
+        - before:
+          - com.example.Recipe4:
+              - com.example.Recipe5
+        - after:
+          - com.example.Recipe7:
+              - com.example.Recipe8
+  - artifactId: '*-service'
+    mergeFiles:
+      - base.yml
+      - common.yml
+    updateRecipeList:
+      name: com.example.Main
+      updateOrder:
+        - first:
+          - com.example.Recipe11
+        - last:
+          - com.example.Recipe20
+        - before:
+          - org.openrewrite.text.ChangeText:
+              - com.example.Recipe6
+        - after:
+          - com.example.Recipe7:
+              - com.example.Recipe9
+
