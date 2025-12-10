@@ -7,7 +7,7 @@
   <description>OpenRewrite recipe YAML 파일들을 병합하고 recipeList를 편집하는 Maven 플러그인</description>
   <groupId>com.yourcompany.plugins</groupId>
   <artifactId>rewrite-prepare-maven-plugin</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>1.0-SNAPSHOT</version>
   <goalPrefix>rewrite-prepare</goalPrefix>
   <mojos>
     <mojo>

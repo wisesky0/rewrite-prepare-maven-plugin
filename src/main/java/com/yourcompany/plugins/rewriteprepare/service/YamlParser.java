@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.SequenceWriter;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
+import com.yourcompany.plugins.rewriteprepare.model.MergeRecipeDefinition;
 import com.yourcompany.plugins.rewriteprepare.model.MergeRules;
 import com.yourcompany.plugins.rewriteprepare.model.RecipeDefinition;
 
@@ -53,14 +54,18 @@ public class YamlParser {
      * 여러 개의 recipe definition이 포함된 YAML 파일을 파싱합니다.
      * 문서 구분자 '---'로 분리된 각 recipe definition을 파싱합니다.
      * Jackson YAMLFactory의 YAMLParser를 사용하여 다중 문서를 처리합니다.
+     * 
+     * org.yourcompany.openrewrite/v1/merge 타입은 MergeRecipeDefinition으로 파싱하고,
+     * 그 외의 타입은 RecipeDefinition으로 파싱합니다.
      *
      * @param recipeFile recipe YAML 파일
-     * @return 파싱된 RecipeDefinition 리스트
+     * @return 파싱된 RecipeDefinition 리스트 (MergeRecipeDefinition은 제외)
      * @throws IOException 파일 읽기 오류
      */
     public List<RecipeDefinition> parseRecipeFile(File recipeFile) throws IOException {
         logger.debug("Recipe 파일 파싱 시작: {}", recipeFile.getAbsolutePath());
         List<RecipeDefinition> recipes = new ArrayList<>();
+        List<MergeRecipeDefinition> mergeDefinitions = new ArrayList<>();
 
         YAMLFactory yamlFactory = new YAMLFactory();
         
@@ -68,12 +73,29 @@ public class YamlParser {
             // YAML 파일의 각 문서를 순회
             while (parser.nextToken() != null) {
                 try {
-                    // 각 문서를 RecipeDefinition으로 파싱
-                    // setRecipeListRaw가 자동으로 정규화를 수행합니다.
-                    RecipeDefinition recipe = yamlMapper.readValue(parser, RecipeDefinition.class);
-                    if (recipe != null && recipe.getName() != null) {
-                        recipes.add(recipe);
-                        logger.debug("Recipe 파싱 완료: {}", recipe.getName());
+                    // 먼저 타입을 확인하기 위해 Map으로 파싱
+                    @SuppressWarnings("unchecked")
+                    java.util.Map<String, Object> rawDoc = yamlMapper.readValue(parser, java.util.Map.class);
+                    
+                    if (rawDoc != null) {
+                        String type = (String) rawDoc.get("type");
+                        
+                        // org.yourcompany.openrewrite/v1/merge 타입인지 확인
+                        if ("org.yourcompany.openrewrite/v1/merge".equals(type)) {
+                            // MergeRecipeDefinition으로 파싱
+                            MergeRecipeDefinition mergeDef = yamlMapper.convertValue(rawDoc, MergeRecipeDefinition.class);
+                            if (mergeDef != null) {
+                                mergeDefinitions.add(mergeDef);
+                                logger.debug("MergeRecipeDefinition 파싱 완료: {}", mergeDef.getName());
+                            }
+                        } else {
+                            // RecipeDefinition으로 파싱
+                            RecipeDefinition recipe = yamlMapper.convertValue(rawDoc, RecipeDefinition.class);
+                            if (recipe != null && recipe.getName() != null) {
+                                recipes.add(recipe);
+                                logger.debug("Recipe 파싱 완료: {}", recipe.getName());
+                            }
+                        }
                     }
                 } catch (Exception e) {
                     logger.warn("Recipe 파싱 중 오류 발생, 다음 문서로 진행: {}", e.getMessage());
@@ -82,8 +104,89 @@ public class YamlParser {
             }
         }
 
-        logger.debug("Recipe 파일 파싱 완료: {} 개의 recipe 발견", recipes.size());
+        logger.debug("Recipe 파일 파싱 완료: {} 개의 recipe, {} 개의 merge definition 발견", 
+                     recipes.size(), mergeDefinitions.size());
+        
+        // MergeRecipeDefinition은 별도로 관리되므로 반환하지 않음
+        // (나중에 RecipeMerger나 RewritePrepareMojo에서 처리)
         return recipes;
+    }
+    
+    /**
+     * 여러 개의 recipe definition이 포함된 YAML 파일을 파싱하고,
+     * MergeRecipeDefinition과 RecipeDefinition을 분리하여 반환합니다.
+     *
+     * @param recipeFile recipe YAML 파일
+     * @return 파싱 결과를 담은 RecipeParseResult 객체
+     * @throws IOException 파일 읽기 오류
+     */
+    public RecipeParseResult parseRecipeFileWithMerge(File recipeFile) throws IOException {
+        logger.debug("Recipe 파일 파싱 시작 (Merge 포함): {}", recipeFile.getAbsolutePath());
+        List<RecipeDefinition> recipes = new ArrayList<>();
+        List<MergeRecipeDefinition> mergeDefinitions = new ArrayList<>();
+
+        YAMLFactory yamlFactory = new YAMLFactory();
+        
+        try (YAMLParser parser = yamlFactory.createParser(recipeFile)) {
+            // YAML 파일의 각 문서를 순회
+            while (parser.nextToken() != null) {
+                try {
+                    // 먼저 타입을 확인하기 위해 Map으로 파싱
+                    @SuppressWarnings("unchecked")
+                    java.util.Map<String, Object> rawDoc = yamlMapper.readValue(parser, java.util.Map.class);
+                    
+                    if (rawDoc != null) {
+                        String type = (String) rawDoc.get("type");
+                        
+                        // org.yourcompany.openrewrite/v1/merge 타입인지 확인
+                        if ("org.yourcompany.openrewrite/v1/merge".equals(type)) {
+                            // MergeRecipeDefinition으로 파싱
+                            MergeRecipeDefinition mergeDef = yamlMapper.convertValue(rawDoc, MergeRecipeDefinition.class);
+                            if (mergeDef != null) {
+                                mergeDefinitions.add(mergeDef);
+                                logger.debug("MergeRecipeDefinition 파싱 완료: {}", mergeDef.getName());
+                            }
+                        } else {
+                            // RecipeDefinition으로 파싱
+                            RecipeDefinition recipe = yamlMapper.convertValue(rawDoc, RecipeDefinition.class);
+                            if (recipe != null && recipe.getName() != null) {
+                                recipes.add(recipe);
+                                logger.debug("Recipe 파싱 완료: {}", recipe.getName());
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    logger.warn("Recipe 파싱 중 오류 발생, 다음 문서로 진행: {}", e.getMessage());
+                    // 오류가 발생해도 다음 문서로 계속 진행
+                }
+            }
+        }
+
+        logger.debug("Recipe 파일 파싱 완료: {} 개의 recipe, {} 개의 merge definition 발견", 
+                     recipes.size(), mergeDefinitions.size());
+        
+        return new RecipeParseResult(recipes, mergeDefinitions);
+    }
+    
+    /**
+     * Recipe 파일 파싱 결과를 담는 클래스
+     */
+    public static class RecipeParseResult {
+        private final List<RecipeDefinition> recipes;
+        private final List<MergeRecipeDefinition> mergeDefinitions;
+        
+        public RecipeParseResult(List<RecipeDefinition> recipes, List<MergeRecipeDefinition> mergeDefinitions) {
+            this.recipes = recipes != null ? new ArrayList<>(recipes) : new ArrayList<>();
+            this.mergeDefinitions = mergeDefinitions != null ? new ArrayList<>(mergeDefinitions) : new ArrayList<>();
+        }
+        
+        public List<RecipeDefinition> getRecipes() {
+            return recipes;
+        }
+        
+        public List<MergeRecipeDefinition> getMergeDefinitions() {
+            return mergeDefinitions;
+        }
     }
 
     /**

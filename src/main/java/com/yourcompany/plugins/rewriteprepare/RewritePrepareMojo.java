@@ -13,6 +13,7 @@ import org.apache.maven.project.MavenProject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.yourcompany.plugins.rewriteprepare.model.MergeRecipeDefinition;
 import com.yourcompany.plugins.rewriteprepare.model.MergeRules;
 import com.yourcompany.plugins.rewriteprepare.model.RecipeDefinition;
 import com.yourcompany.plugins.rewriteprepare.model.Rule;
@@ -142,17 +143,30 @@ public class RewritePrepareMojo extends AbstractMojo {
 
             logger.info("매칭된 규칙: {} 개", matchedRules.size());
 
-            // 1단계: 모든 규칙의 mergeFiles 병합
-            List<RecipeDefinition> mergedRecipes = mergeAllFiles(matchedRules);
+            // 1단계: 모든 규칙의 mergeFiles 병합 (MergeRecipeDefinition 포함)
+            RecipeMerger.MergeResult mergeResult = mergeAllFilesWithMerge(matchedRules);
+            List<RecipeDefinition> mergedRecipes = mergeResult.getRecipes();
+            List<MergeRecipeDefinition> mergedMergeDefinitions = mergeResult.getMergeDefinitions();
 
-            // 2단계: 모든 규칙의 updateRecipeList 수행
+            // 2단계: MergeRecipeDefinition의 updateRecipeList 수행
+            for (MergeRecipeDefinition mergeDef : mergedMergeDefinitions) {
+                if (mergeDef.getRules() != null) {
+                    for (com.yourcompany.plugins.rewriteprepare.model.UpdateRecipeList updateRecipeList : mergeDef.getRules()) {
+                        if (updateRecipeList != null) {
+                            mergedRecipes = recipeListUpdater.updateRecipeList(mergedRecipes, updateRecipeList);
+                        }
+                    }
+                }
+            }
+
+            // 3단계: merge-rules.yml의 updateRecipeList 수행
             for (Rule rule : matchedRules) {
                 if (rule.getUpdateRecipeList() != null) {
                     mergedRecipes = recipeListUpdater.updateRecipeList(mergedRecipes, rule.getUpdateRecipeList());
                 }
             }
 
-            // 3단계: 결과 출력
+            // 4단계: 결과 출력 (MergeRecipeDefinition은 제외)
             yamlParser.writeRecipes(mergedRecipes, outputFile);
 
             logger.info("Rewrite Prepare Maven Plugin 실행 완료");
@@ -219,7 +233,9 @@ public class RewritePrepareMojo extends AbstractMojo {
     /**
      * 모든 규칙의 mergeFiles를 병합합니다.
      * 중복된 파일은 skip합니다.
+     * @deprecated mergeAllFilesWithMerge를 사용하세요.
      */
+    @Deprecated
     private List<RecipeDefinition> mergeAllFiles(List<Rule> matchedRules) throws Exception {
         List<String> allMergeFiles = new ArrayList<>();
         for (Rule rule : matchedRules) {
@@ -229,6 +245,21 @@ public class RewritePrepareMojo extends AbstractMojo {
         }
 
         return recipeMerger.mergeFiles(recipeDirectory, allMergeFiles);
+    }
+    
+    /**
+     * 모든 규칙의 mergeFiles를 병합하고 MergeRecipeDefinition도 함께 반환합니다.
+     * 중복된 파일은 skip합니다.
+     */
+    private RecipeMerger.MergeResult mergeAllFilesWithMerge(List<Rule> matchedRules) throws Exception {
+        List<String> allMergeFiles = new ArrayList<>();
+        for (Rule rule : matchedRules) {
+            if (rule.getMergeFiles() != null) {
+                allMergeFiles.addAll(rule.getMergeFiles());
+            }
+        }
+
+        return recipeMerger.mergeFilesWithMerge(recipeDirectory, allMergeFiles);
     }
 }
 

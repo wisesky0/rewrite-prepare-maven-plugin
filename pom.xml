@@ -7,7 +7,7 @@
 
     <groupId>com.yourcompany.plugins</groupId>
     <artifactId>rewrite-prepare-maven-plugin</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>1.0-SNAPSHOT</version>
     <packaging>maven-plugin</packaging>
 
     <name>Rewrite Prepare Maven Plugin</name>

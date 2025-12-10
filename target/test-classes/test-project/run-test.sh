@@ -1,6 +1,20 @@
 #!/bin/bash
 
 # Rewrite Prepare Maven Plugin 테스트 실행 스크립트
+#
+# 이 스크립트는 test-project에서 플러그인을 테스트하기 위해 사용됩니다.
+# 
+# 처리 과정:
+# 1. 플러그인을 빌드하고 로컬 Maven 저장소에 설치
+# 2. test-project에서 플러그인 실행
+# 3. 생성된 openrewrite/rewrite.yml 파일 확인
+#
+# 파일 구조:
+# - migration-ci/rules/merge-rules.yml: 머지 규칙 파일
+# - migration-ci/recipes/base.yml: 기본 레시피 정의 및 트리거 recipe
+# - migration-ci/recipes/my-service.yml: base.yml에 머지되는 파일
+# - migration-ci/recipes/common.yml: base.yml에 머지되는 파일
+# - openrewrite/rewrite.yml: 플러그인 실행 후 생성되는 출력 파일
 
 set -e
 

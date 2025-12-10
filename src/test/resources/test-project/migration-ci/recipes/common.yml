@@ -1,4 +1,21 @@
 ---
+type: org.yourcompany.openrewrite/v1/merge
+name: 머지 규칙
+rules:
+  - updateRecipeList:
+      name: com.example.Main
+      updateOrder:
+        - first:
+          - com.example.Recipe11
+        - last:
+          - com.example.Recipe20
+        - before:
+          - org.openrewrite.text.ChangeText:
+              - com.example.Recipe6
+        - after:
+          - com.example.Recipe3:
+              - com.example.Recipe9
+---
 type: specs.openrewrite.org/v1beta/recipe
 name: com.example.CommonRecipe
 displayName: General Purpose Recipe

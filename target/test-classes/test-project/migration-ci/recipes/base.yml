@@ -7,11 +7,10 @@ tags:
   - migration
   - base
 recipeList:
-  - com.example.Recipe0
-  - com.example.Recipe7
   - org.openrewrite.text.ChangeText:
       toText: "Initial text"
-  - com.example.Recipe7
+  - com.example.Recipe2
+  - com.example.Recipe3
 
 ---
 type: specs.openrewrite.org/v1beta/recipe
@@ -45,4 +44,26 @@ tags:
 recipeList:
   - com.base.RecipeStepD
   - com.base.RecipeStepE
+
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: com.example.Recipe2
+displayName: Recipe 2
+description: Example recipe 2 for base
+tags:
+  - migration
+  - base
+recipeList:
+  - com.base.RecipeStepA
+
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: com.example.Recipe3
+displayName: Recipe 3
+description: Example recipe 3 for base
+tags:
+  - migration
+  - base
+recipeList:
+  - com.base.RecipeStepB
 

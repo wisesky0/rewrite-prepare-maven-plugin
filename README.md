@@ -14,7 +14,7 @@ OpenRewrite recipe YAML 파일들을 병합하고 `recipeList`를 편집하는 M
 <plugin>
     <groupId>com.yourcompany.plugins</groupId>
     <artifactId>rewrite-prepare-maven-plugin</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>1.0-SNAPSHOT</version>
 </plugin>
 ```
 
@@ -38,13 +38,13 @@ mvn clean install
         <plugin>
             <groupId>com.yourcompany.plugins</groupId>
             <artifactId>rewrite-prepare-maven-plugin</artifactId>
-            <version>0.1.0-SNAPSHOT</version>
+            <version>1.0-SNAPSHOT</version>
             <configuration>
                 <!-- recipeDirectory: recipe 파일들이 있는 디렉토리 (기본값: ${project.basedir}) -->
                 <recipeDirectory>${project.basedir}/migration-ci/recipes</recipeDirectory>
                 
                 <!-- mergeRuleFile: 머지 규칙 파일 경로 (기본값: merge-rules.yml) -->
-                <mergeRuleFile>${project.basedir}/migration-ci/merge-rules.yml</mergeRuleFile>
+                <mergeRuleFile>${project.basedir}/migration-ci/rules/merge-rules.yml</mergeRuleFile>
                 
                 <!-- outputFile: 출력 파일 경로 (기본값: openrewrite/rewrite.yml) -->
                 <outputFile>${project.basedir}/openrewrite/rewrite.yml</outputFile>
@@ -105,21 +105,8 @@ rules:
   - artifactId: my-service        # 필수: 프로젝트 artifactId (glob 패턴 지원)
     groupId: com.example          # 선택: 프로젝트 groupId (생략 시 '*'와 동일)
     mergeFiles:                   # 필수: 병합할 recipe 파일 목록 (상대 경로)
-      - base.yml
-      - my-service.yml
-    updateRecipeList:             # 선택: recipeList 업데이트 설정
-      name: com.example.Main     # 필수: 업데이트할 recipe 정의 이름
-      updateOrder:               # 선택: 업데이트 순서
-        - first:                  # recipeList의 가장 앞에 추가
-          - com.example.Recipe1
-        - last:                   # recipeList의 가장 마지막에 추가
-          - com.example.Recipe10
-        - before:                 # 지정한 recipe 앞에 추가
-          - com.example.Recipe4:
-              - com.example.Recipe5
-        - after:                  # 지정한 recipe 뒤에 추가
-          - com.example.Recipe7:
-              - com.example.Recipe8
+      - base.yml                  # 기본 레시피 정의 및 트리거 recipe
+      - my-service.yml            # base.yml에 머지되는 파일
 ```
 
 ### 필수 속성
@@ -131,15 +118,12 @@ rules:
   - `recipeDirectory` 하위의 상대 경로를 지정합니다.
   - 중복된 파일은 자동으로 스킵됩니다.
 
-- **`updateRecipeList.name`**: `updateRecipeList`가 있으면 필수 속성입니다. 없거나 비어 있으면 오류가 발생합니다.
-  - `recipeList`를 수정할 레시피 정의의 이름을 지정합니다.
-
 ### 선택 속성
 
 - **`groupId`**: 생략 가능합니다. 생략된 경우 `'*'`와 같습니다.
   - glob 패턴을 사용할 수 있습니다.
 
-- **`updateRecipeList`**: 생략 가능합니다. 생략하면 `recipeList` 업데이트를 수행하지 않습니다.
+**참고**: `updateRecipeList`는 `merge-rules.yml`에서 제거되었습니다. 대신 `org.yourcompany.openrewrite/v1/merge` 타입을 머지 파일들(`my-service.yml`, `common.yml` 등)에 포함하여 `recipeList` 업데이트 규칙을 정의합니다.
 
 ### updateOrder 설명
 
@@ -239,39 +223,25 @@ rules:
   - artifactId: my-service
     groupId: com.example
     mergeFiles:
-      - base.yml
-      - my-service.yml
-    updateRecipeList:
-      name: com.example.Main
-      updateOrder:
-        - first:
-          - com.example.Recipe1
-        - last:
-          - com.example.Recipe10
-        - before:
-          - com.example.Recipe4:
-              - com.example.Recipe5
-        - after:
-          - com.example.Recipe7:
-              - com.example.Recipe8
+      - base.yml          # 기본 레시피 정의 및 트리거 recipe
+      - my-service.yml    # base.yml에 머지되는 파일
   
   # 모든 서비스에 공통으로 적용되는 규칙
   - artifactId: '*-service'
     mergeFiles:
-      - base.yml
-      - common.yml
-    updateRecipeList:
-      name: com.example.Main
-      updateOrder:
-        - first:
-          - com.example.Recipe11
-        - last:
-          - com.example.Recipe20
+      - base.yml          # 기본 레시피 정의 및 트리거 recipe
+      - common.yml        # base.yml에 머지되는 파일
 ```
+
+**참고**: `recipeList` 업데이트 규칙은 `org.yourcompany.openrewrite/v1/merge` 타입을 머지 파일들에 포함하여 정의합니다. 자세한 내용은 "Recipe Definition 형식" 섹션을 참조하세요.
 
 ## Recipe Definition 형식
 
-OpenRewrite recipe YAML 파일은 `---` 구분자로 여러 개의 recipe definition을 포함할 수 있습니다:
+OpenRewrite recipe YAML 파일은 `---` 구분자로 여러 개의 recipe definition을 포함할 수 있습니다. 두 가지 타입을 지원합니다:
+
+### 1. 일반 Recipe 정의 (specs.openrewrite.org/v1beta/recipe)
+
+이 타입은 실제 OpenRewrite recipe를 정의합니다. **이 타입의 정의는 병합된 결과 파일에 포함됩니다.**
 
 ```yaml
 ---
@@ -297,6 +267,40 @@ recipeList:
   - com.example.Recipe1
 ```
 
+### 2. 머지 규칙 정의 (org.yourcompany.openrewrite/v1/merge)
+
+이 타입은 `recipeList` 업데이트 규칙을 정의합니다. **이 타입의 정의는 병합된 결과 파일에 포함되지 않습니다.**
+
+**사용 위치:**
+- **`base.yml`에는 포함하지 않습니다.** `base.yml`은 기본 레시피 정의와 트리거 recipe를 정의하는 파일이므로 이 타입을 포함하지 않습니다.
+- **머지 파일들에만 포함합니다.** `base.yml`에 머지되어 최종 실행 recipe를 만드는 용도의 파일들(`my-service.yml`, `common.yml` 등)에 이 타입을 포함하여 해당 파일의 레시피들이 트리거 recipe의 `recipeList`에 어떻게 추가되는지 정의합니다.
+
+```yaml
+---
+type: org.yourcompany.openrewrite/v1/merge
+name: 머지 규칙
+rules:
+  - updateRecipeList:
+      name: com.example.Main        # 필수: recipeList를 수정할 레시피 정의의 이름
+      updateOrder:
+        - first:                    # recipeList의 가장 앞에 추가
+          - com.example.Recipe1
+        - last:                     # recipeList의 가장 마지막에 추가
+          - com.example.Recipe10
+        - before:                   # 지정한 recipe 앞에 추가
+          - com.example.Recipe2:
+              - com.example.Recipe5
+        - after:                    # 지정한 recipe 뒤에 추가
+          - org.openrewrite.text.ChangeText:
+              - com.example.Recipe8
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: com.example.ServiceRecipe
+displayName: Service Recipe
+recipeList:
+  - com.example.ServiceRecipe1
+```
+
 ### recipeList 형식
 
 `recipeList`는 다음 두 가지 형식을 지원합니다:
@@ -313,8 +317,12 @@ recipeList:
 
 1. **규칙 매칭**: 프로젝트의 `groupId`, `artifactId`와 매칭되는 규칙을 찾습니다.
 2. **파일 병합**: 매칭된 모든 규칙의 `mergeFiles`를 병합합니다 (중복 파일은 스킵).
-3. **recipeList 업데이트**: 매칭된 모든 규칙의 `updateRecipeList`를 순서대로 수행합니다.
-4. **결과 출력**: 최종 결과를 `outputFile`에 저장합니다.
+   - 첫 번째 파일(일반적으로 `base.yml`)은 기본 레시피 정의와 트리거 recipe를 정의합니다.
+   - 이후 파일들(`my-service.yml`, `common.yml` 등)은 `base.yml`에 머지되어 최종 실행 recipe를 만드는 용도입니다.
+3. **recipeList 업데이트**: 병합된 파일들에서 `org.yourcompany.openrewrite/v1/merge` 타입을 찾아 `recipeList`를 업데이트합니다.
+   - `base.yml`에는 `org.yourcompany.openrewrite/v1/merge` 타입을 포함하지 않습니다.
+   - 머지 파일들(`my-service.yml`, `common.yml` 등)에 포함된 `org.yourcompany.openrewrite/v1/merge` 타입의 규칙이 순서대로 적용됩니다.
+4. **결과 출력**: `org.yourcompany.openrewrite/v1/merge` 타입은 제외하고 모든 `specs.openrewrite.org/v1beta/recipe` 타입의 정의만 `outputFile`에 저장합니다.
 
 ## 프로젝트 구조 예시
 
@@ -322,11 +330,12 @@ recipeList:
 project/
 ├── pom.xml
 ├── migration-ci/
-│   ├── merge-rules.yml          # 머지 규칙 파일
+│   ├── rules/
+│   │   └── merge-rules.yml      # 머지 규칙 파일
 │   └── recipes/
-│       ├── base.yml             # 기본 recipe
-│       ├── my-service.yml       # 서비스별 recipe
-│       └── common.yml            # 공통 recipe
+│       ├── base.yml             # 기본 레시피 정의 및 트리거 recipe
+│       ├── my-service.yml       # base.yml에 머지되는 파일 (서비스별 recipe)
+│       └── common.yml            # base.yml에 머지되는 파일 (공통 recipe)
 └── openrewrite/
     └── rewrite.yml              # 플러그인 실행 후 생성되는 출력 파일
 ```
@@ -350,12 +359,14 @@ project/
 
 - `artifactId`는 필수입니다.
 - `mergeFiles`는 필수이며 비어있으면 안 됩니다.
-- `updateRecipeList`가 있으면 `name`도 필수입니다.
+- `org.yourcompany.openrewrite/v1/merge` 타입의 `rules[*].updateRecipeList.name`은 필수입니다.
 
 ### recipeList 업데이트가 작동하지 않는 경우
 
-- `updateRecipeList.name`에 지정한 recipe 정의가 병합된 파일에 존재하는지 확인하세요.
+- `org.yourcompany.openrewrite/v1/merge` 타입이 머지 파일들에 올바르게 포함되어 있는지 확인하세요.
+- `updateRecipeList.name`에 지정한 recipe 정의(일반적으로 `base.yml`에 정의된 트리거 recipe)가 병합된 파일에 존재하는지 확인하세요.
 - `before`/`after`에서 지정한 recipe 이름이 `recipeList`에 존재하는지 확인하세요.
+- `base.yml`에는 `org.yourcompany.openrewrite/v1/merge` 타입을 포함하지 않아야 합니다.
 
 ## 라이선스
 

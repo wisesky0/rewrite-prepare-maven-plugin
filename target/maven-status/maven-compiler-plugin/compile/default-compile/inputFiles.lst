@@ -1,12 +1,13 @@
 /Users/h2seo/codespace/maven-plugins/rewrite-prepare-maven-plugin/src/main/java/com/yourcompany/plugins/rewriteprepare/model/UpdateRecipeList.java
-/Users/h2seo/codespace/maven-plugins/rewrite-prepare-maven-plugin/src/main/java/com/yourcompany/plugins/rewriteprepare/model/Rule.java
 /Users/h2seo/codespace/maven-plugins/rewrite-prepare-maven-plugin/src/main/java/com/yourcompany/plugins/rewriteprepare/service/PatternMatcher.java
 /Users/h2seo/codespace/maven-plugins/rewrite-prepare-maven-plugin/src/main/java/com/yourcompany/plugins/rewriteprepare/service/RecipeMerger.java
 /Users/h2seo/codespace/maven-plugins/rewrite-prepare-maven-plugin/src/main/java/com/yourcompany/plugins/rewriteprepare/service/RecipeListUpdater.java
 /Users/h2seo/codespace/maven-plugins/rewrite-prepare-maven-plugin/src/main/java/com/yourcompany/plugins/rewriteprepare/RewritePrepareMojo.java
-/Users/h2seo/codespace/maven-plugins/rewrite-prepare-maven-plugin/src/main/java/com/yourcompany/plugins/rewriteprepare/model/Recipe.java
 /Users/h2seo/codespace/maven-plugins/rewrite-prepare-maven-plugin/src/main/java/com/yourcompany/plugins/rewriteprepare/model/UpdateEntry.java
-/Users/h2seo/codespace/maven-plugins/rewrite-prepare-maven-plugin/src/main/java/com/yourcompany/plugins/rewriteprepare/service/YamlParser.java
 /Users/h2seo/codespace/maven-plugins/rewrite-prepare-maven-plugin/src/main/java/com/yourcompany/plugins/rewriteprepare/serializer/UnquotedStringSerializer.java
 /Users/h2seo/codespace/maven-plugins/rewrite-prepare-maven-plugin/src/main/java/com/yourcompany/plugins/rewriteprepare/model/RecipeDefinition.java
+/Users/h2seo/codespace/maven-plugins/rewrite-prepare-maven-plugin/src/main/java/com/yourcompany/plugins/rewriteprepare/model/Rule.java
+/Users/h2seo/codespace/maven-plugins/rewrite-prepare-maven-plugin/src/main/java/com/yourcompany/plugins/rewriteprepare/model/Recipe.java
+/Users/h2seo/codespace/maven-plugins/rewrite-prepare-maven-plugin/src/main/java/com/yourcompany/plugins/rewriteprepare/model/MergeRecipeDefinition.java
+/Users/h2seo/codespace/maven-plugins/rewrite-prepare-maven-plugin/src/main/java/com/yourcompany/plugins/rewriteprepare/service/YamlParser.java
 /Users/h2seo/codespace/maven-plugins/rewrite-prepare-maven-plugin/src/main/java/com/yourcompany/plugins/rewriteprepare/model/MergeRules.java

@@ -1,4 +1,21 @@
 ---
+type: org.yourcompany.openrewrite/v1/merge
+name: 머지 규칙
+rules:
+  - updateRecipeList:
+      name: com.example.Main
+      updateOrder:
+        - first:
+          - com.example.Recipe1
+        - last:
+          - com.example.Recipe10
+        - before:
+          - com.example.Recipe2:
+              - com.example.Recipe5
+        - after:
+          - org.openrewrite.text.ChangeText:
+              - com.example.Recipe8
+---
 type: specs.openrewrite.org/v1beta/recipe
 name: com.example.ServiceRecipe
 displayName: Service Recipe

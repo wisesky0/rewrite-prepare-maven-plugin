@@ -1,5 +1,4 @@
 ---
-# Source: base.yml
 type: specs.openrewrite.org/v1beta/recipe
 name: com.example.Main
 displayName: Main Recipe
@@ -10,20 +9,17 @@ tags:
 recipeList:
 - com.example.Recipe11
 - com.example.Recipe1
-- com.example.Recipe0
-- com.example.Recipe7
-- com.example.Recipe9
-- com.example.Recipe8
 - com.example.Recipe6
 - org.openrewrite.text.ChangeText:
     toText: Initial text
-- com.example.Recipe7
-- com.example.Recipe10
+- com.example.Recipe8
 - com.example.Recipe5
-- com.example.Recipe4
+- com.example.Recipe2
+- com.example.Recipe3
+- com.example.Recipe9
+- com.example.Recipe10
 - com.example.Recipe20
 ---
-# Source: base.yml
 type: specs.openrewrite.org/v1beta/recipe
 name: com.base.Recipe3
 displayName: Recipe 3
@@ -34,7 +30,6 @@ recipeList:
 - com.base.RecipeStepA
 - com.base.RecipeStepB
 ---
-# Source: base.yml
 type: specs.openrewrite.org/v1beta/recipe
 name: com.base.Recipe4
 displayName: Recipe 4
@@ -45,7 +40,6 @@ recipeList:
 - com.base.RecipeStepB
 - com.base.RecipeStepC
 ---
-# Source: base.yml
 type: specs.openrewrite.org/v1beta/recipe
 name: com.base.Recipe7
 displayName: Recipe 7
@@ -56,7 +50,26 @@ recipeList:
 - com.base.RecipeStepD
 - com.base.RecipeStepE
 ---
-# Source: my-service.yml
+type: specs.openrewrite.org/v1beta/recipe
+name: com.example.Recipe2
+displayName: Recipe 2
+description: Example recipe 2 for base
+tags:
+- migration
+- base
+recipeList:
+- com.base.RecipeStepA
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: com.example.Recipe3
+displayName: Recipe 3
+description: Example recipe 3 for base
+tags:
+- migration
+- base
+recipeList:
+- com.base.RecipeStepB
+---
 type: specs.openrewrite.org/v1beta/recipe
 name: com.example.ServiceRecipe
 displayName: Service Recipe
@@ -67,7 +80,6 @@ recipeList:
 - com.example.ServiceRecipe1
 - com.example.ServiceRecipe2
 ---
-# Source: my-service.yml
 type: specs.openrewrite.org/v1beta/recipe
 name: com.example.Recipe1
 displayName: Recipe 1
@@ -77,7 +89,6 @@ tags:
 recipeList:
 - com.example.ServiceRecipe1
 ---
-# Source: my-service.yml
 type: specs.openrewrite.org/v1beta/recipe
 name: com.example.Recipe10
 displayName: Recipe 10
@@ -87,7 +98,6 @@ tags:
 recipeList:
 - com.example.ServiceRecipe2
 ---
-# Source: my-service.yml
 type: specs.openrewrite.org/v1beta/recipe
 name: com.example.Recipe5
 displayName: Recipe 5
@@ -97,7 +107,6 @@ tags:
 recipeList:
 - com.example.ServiceRecipe1
 ---
-# Source: my-service.yml
 type: specs.openrewrite.org/v1beta/recipe
 name: com.example.Recipe8
 displayName: Recipe 8
@@ -107,7 +116,6 @@ tags:
 recipeList:
 - com.example.ServiceRecipe2
 ---
-# Source: my-service.yml
 type: specs.openrewrite.org/v1beta/recipe
 name: com.example.Recipe2
 displayName: Recipe 2
@@ -117,7 +125,6 @@ tags:
 recipeList:
 - com.example.ServiceRecipe1
 ---
-# Source: common.yml
 type: specs.openrewrite.org/v1beta/recipe
 name: com.example.CommonRecipe
 displayName: General Purpose Recipe
@@ -126,7 +133,6 @@ recipeList:
 - com.example.SharedStepA
 - com.example.SharedStepB
 ---
-# Source: common.yml
 type: specs.openrewrite.org/v1beta/recipe
 name: com.example.Recipe20
 displayName: Service-wide Operation 20
@@ -135,7 +141,6 @@ recipeList:
 - com.example.SharedStepC
 - com.example.CommonRecipe1
 ---
-# Source: common.yml
 type: specs.openrewrite.org/v1beta/recipe
 name: com.example.Recipe11
 displayName: Ancillary Service Recipe 11
@@ -144,7 +149,6 @@ recipeList:
 - com.example.CommonRecipe2
 - com.example.SharedStepB
 ---
-# Source: common.yml
 type: specs.openrewrite.org/v1beta/recipe
 name: com.example.Recipe9
 displayName: Maintenance Routine 9
@@ -153,7 +157,6 @@ recipeList:
 - com.example.SharedStepA
 - com.example.SharedStepD
 ---
-# Source: common.yml
 type: specs.openrewrite.org/v1beta/recipe
 name: com.example.Recipe6
 displayName: Preprocessing Steps Set 6
@@ -161,4 +164,3 @@ description: Collection of preprocessing steps (set 6) for service onboarding
 recipeList:
 - com.example.CommonRecipe2
 - com.example.SharedStepC
-
