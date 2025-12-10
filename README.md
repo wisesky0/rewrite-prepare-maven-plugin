@@ -204,6 +204,25 @@ rules:
       - my-specific.yml
 ```
 
+### 쉼표로 구분된 여러 패턴 지원
+
+`artifactId`와 `groupId`에는 쉼표로 구분하여 여러 패턴을 지정할 수 있습니다. 하나라도 매칭되면 규칙이 적용됩니다:
+
+```yaml
+rules:
+  - artifactId: 'my-service,other-service,*-api'  # 세 패턴 중 하나라도 매칭되면 적용
+    mergeFiles:
+      - base.yml
+      - common.yml
+  - artifactId: 'service-*,api-*,*-svc'            # glob 패턴과 일반 패턴 혼합 가능
+    groupId: 'com.example,com.other'              # groupId에도 적용 가능
+    mergeFiles:
+      - base.yml
+      - shared.yml
+```
+
+**참고**: 쉼표 주변의 공백은 자동으로 제거되며, 빈 패턴은 무시됩니다.
+
 ### 여러 규칙 매칭
 
 프로젝트의 `groupId`와 `artifactId`가 여러 규칙과 매칭되는 경우:
