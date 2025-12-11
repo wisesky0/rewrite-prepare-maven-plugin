@@ -19,7 +19,7 @@ rules:
 type: specs.openrewrite.org/v1beta/recipe
 name: com.example.ServiceRecipe
 displayName: Service Recipe
-description: Service-specific recipe
+description: Service-specific recipe for ${service.name} (version ${app.version})
 tags:
   - service
 recipeList:

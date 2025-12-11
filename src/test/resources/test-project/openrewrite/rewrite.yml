@@ -2,7 +2,7 @@
 type: specs.openrewrite.org/v1beta/recipe
 name: com.example.Main
 displayName: Main Recipe
-description: Main recipe for migration
+description: "Main recipe for MyApplication migration"
 tags:
 - migration
 - base
@@ -73,7 +73,7 @@ recipeList:
 type: specs.openrewrite.org/v1beta/recipe
 name: com.example.ServiceRecipe
 displayName: Service Recipe
-description: Service-specific recipe
+description: "Service-specific recipe for my-service (version 1.0.0)"
 tags:
 - service
 recipeList:
@@ -128,7 +128,7 @@ recipeList:
 type: specs.openrewrite.org/v1beta/recipe
 name: com.example.CommonRecipe
 displayName: General Purpose Recipe
-description: A generic common recipe applicable to multiple services
+description: "A generic common recipe applicable to multiple services (MyApplication)"
 recipeList:
 - com.example.SharedStepA
 - com.example.SharedStepB

@@ -27,9 +27,18 @@
                 </configuration>
                 <executions>
                     <execution>
+                        <id>prepare</id>
                         <goals>
                             <goal>prepare</goal>
                         </goals>
+                        <phase>process-resources</phase>
+                    </execution>
+                    <execution>
+                        <id>resolve</id>
+                        <goals>
+                            <goal>resolve</goal>
+                        </goals>
+                        <phase>process-resources</phase>
                     </execution>
                 </executions>
             </plugin>

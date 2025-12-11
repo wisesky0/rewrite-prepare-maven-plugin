@@ -9,7 +9,8 @@ test-project/
 ├── pom.xml                          # 플러그인 설정이 포함된 테스트 프로젝트
 ├── migration-ci/
 │   ├── rules/
-│   │   └── merge-rules.yml          # 머지 규칙 파일
+│   │   ├── merge-rules.yml          # 머지 규칙 파일
+│   │   └── var-map.properties       # 변수 맵 파일 (resolve goal에서 사용)
 │   └── recipes/
 │       ├── base.yml                 # 기본 레시피 정의 및 트리거 recipe
 │       ├── my-service.yml           # base.yml에 머지되는 파일 (서비스별 recipe)
@@ -43,6 +44,16 @@ cd src/test/resources/test-project
 
 ### 3. 플러그인 실행
 
+#### 변수 치환 실행 (선택사항)
+
+recipe 파일의 변수를 치환하려면 먼저 `resolve` goal을 실행합니다:
+
+```bash
+mvn rewrite-prepare:resolve
+```
+
+#### recipe 병합 및 업데이트 실행
+
 ```bash
 mvn rewrite-prepare:prepare
 ```
@@ -52,6 +63,8 @@ mvn rewrite-prepare:prepare
 ```bash
 mvn com.yourcompany.plugins:rewrite-prepare-maven-plugin:1.0-SNAPSHOT:prepare
 ```
+
+**참고**: `pom.xml`에 설정된 executions에 따라 `process-resources` phase에서 자동으로 `prepare`와 `resolve`가 순서대로 실행됩니다.
 
 ### 4. 결과 확인
 
@@ -81,6 +94,16 @@ mvn com.yourcompany.plugins:rewrite-prepare-maven-plugin:1.0-SNAPSHOT:prepare
 ## CLI 옵션
 
 플러그인 설정을 CLI로 오버라이드할 수 있습니다:
+
+### resolve goal
+
+```bash
+mvn rewrite-prepare:resolve \
+  -Drewrite-prepare.outputFile=./custom-output.yml \
+  -Drewrite-prepare.varMapFile=./custom-var-map.properties
+```
+
+### prepare goal
 
 ```bash
 mvn rewrite-prepare:prepare \

@@ -2,7 +2,7 @@
 type: specs.openrewrite.org/v1beta/recipe
 name: com.example.Main
 displayName: Main Recipe
-description: Main recipe for migration
+description: Main recipe for ${app.name} migration
 tags:
   - migration
   - base

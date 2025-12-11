@@ -1,5 +1,0 @@
-com/yourcompany/plugins/rewriteprepare/RewritePrepareMojoTest.class
-com/yourcompany/plugins/rewriteprepare/service/YamlParserTest.class
-com/yourcompany/plugins/rewriteprepare/service/PatternMatcherTest.class
-com/yourcompany/plugins/rewriteprepare/service/RecipeMergerTest.class
-com/yourcompany/plugins/rewriteprepare/service/RecipeListUpdaterTest.class

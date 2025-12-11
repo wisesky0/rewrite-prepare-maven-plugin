@@ -6,11 +6,13 @@
 # 
 # 처리 과정:
 # 1. 플러그인을 빌드하고 로컬 Maven 저장소에 설치
-# 2. test-project에서 플러그인 실행
-# 3. 생성된 openrewrite/rewrite.yml 파일 확인
+# 2. test-project에서 prepare goal 실행 (recipe 병합 및 업데이트)
+# 3. test-project에서 resolve goal 실행 (변수 치환)
+# 4. 생성된 openrewrite/rewrite.yml 파일 확인
 #
 # 파일 구조:
 # - migration-ci/rules/merge-rules.yml: 머지 규칙 파일
+# - migration-ci/rules/var-map.properties: 변수 맵 파일
 # - migration-ci/recipes/base.yml: 기본 레시피 정의 및 트리거 recipe
 # - migration-ci/recipes/my-service.yml: base.yml에 머지되는 파일
 # - migration-ci/recipes/common.yml: base.yml에 머지되는 파일
@@ -67,18 +69,46 @@ if [ -f "$OUTPUT_FILE" ]; then
     echo ""
 fi
 
-# 4. 플러그인 실행
-echo "4. 플러그인 실행 중..."
+# 4. recipe 병합 및 업데이트 실행 (prepare goal)
+# 이 단계에서 변수 placeholder가 유지된 채로 머지됩니다.
+echo "4. recipe 병합 및 업데이트 실행 중 (prepare goal)..."
 mvn -f "$TEST_PROJECT_DIR/pom.xml" rewrite-prepare:prepare
 echo ""
 
-# 5. 결과 확인
-echo "5. 결과 확인..."
+# 5. 변수 치환 실행 (resolve goal)
+# prepare goal에서 생성된 outputFile의 변수를 치환합니다.
+echo "5. 변수 치환 실행 중 (resolve goal)..."
+VAR_MAP_FILE="$TEST_PROJECT_DIR/migration-ci/rules/var-map.properties"
+if [ -f "$VAR_MAP_FILE" ]; then
+    if [ -f "$OUTPUT_FILE" ]; then
+        echo "--- 변수 치환 전 (처음 10줄) ---"
+        head -10 "$OUTPUT_FILE" | grep -E "\$\{|MyApplication" || echo "변수 확인 중..."
+        echo ""
+        
+        mvn -f "$TEST_PROJECT_DIR/pom.xml" rewrite-prepare:resolve
+        echo "✓ 변수 치환 완료"
+        
+        echo ""
+        echo "--- 변수 치환 후 (처음 10줄) ---"
+        head -10 "$OUTPUT_FILE" | grep -E "\$\{|MyApplication" || echo "변수 치환 확인 중..."
+    else
+        echo "⚠ 출력 파일이 없습니다. prepare goal을 먼저 실행해야 합니다."
+    fi
+else
+    echo "⚠ 변수 맵 파일이 없습니다: $VAR_MAP_FILE"
+    echo "  변수 치환을 건너뜁니다."
+fi
+echo ""
+
+# 6. 결과 확인
+echo "6. 결과 확인..."
 if [ -f "$OUTPUT_FILE" ]; then
     echo "✓ 출력 파일 생성됨: $OUTPUT_FILE"
     echo ""
-    echo "=== 생성된 파일 내용 ==="
-    cat "$OUTPUT_FILE"
+    echo "=== 생성된 파일 내용 (처음 50줄) ==="
+    head -50 "$OUTPUT_FILE"
+    echo ""
+    echo "... (나머지 생략) ..."
     echo ""
     echo "=== 테스트 완료 ==="
 else

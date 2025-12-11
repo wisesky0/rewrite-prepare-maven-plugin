@@ -94,6 +94,113 @@ mvn rewrite-prepare:prepare \
   -Drewrite-prepare.artifactId=custom-service
 ```
 
+### 3. 변수 치환 (resolve goal)
+
+`prepare` goal에서 생성된 `outputFile`에서 `${variable}` 또는 `$variable` 형식의 변수를 `rules/var-map.properties` 파일에서 찾아서 값을 치환합니다.
+
+**주의**: 이 goal은 `prepare` goal **이후**에 실행되어야 합니다. `prepare` goal에서 머지된 결과 파일(`outputFile`)의 변수를 치환합니다.
+
+#### 실행 방법
+
+```bash
+# 1. 먼저 prepare goal 실행 (변수 placeholder가 유지된 채로 머지)
+mvn rewrite-prepare:prepare
+
+# 2. 그 다음 resolve goal 실행 (머지된 파일의 변수 치환)
+mvn rewrite-prepare:resolve
+```
+
+또는 `pom.xml`의 `executions`에서 순서를 지정하면 자동으로 실행됩니다:
+
+```xml
+<executions>
+    <execution>
+        <id>prepare</id>
+        <goals>
+            <goal>prepare</goal>
+        </goals>
+    </execution>
+    <execution>
+        <id>resolve</id>
+        <goals>
+            <goal>resolve</goal>
+        </goals>
+    </execution>
+</executions>
+```
+
+#### CLI 옵션으로 설정 오버라이드
+
+```bash
+mvn rewrite-prepare:resolve \
+  -Drewrite-prepare.outputFile=./custom-output.yml \
+  -Drewrite-prepare.varMapFile=./custom-var-map.properties
+```
+
+#### var-map.properties 파일 형식
+
+`rules/var-map.properties` 파일에 변수와 값을 정의합니다:
+
+```properties
+# 애플리케이션 정보
+app.name=MyApplication
+app.version=1.0.0
+
+# 데이터베이스 정보
+database.url=jdbc:mysql://localhost:3306/mydb
+database.username=admin
+```
+
+#### 변수 형식
+
+recipe 파일에서 다음 두 가지 형식의 변수를 사용할 수 있습니다:
+
+1. **`${variable}` 형식**: `${app.name}`, `${database.url}` 등
+2. **`$variable` 형식**: `$app.name`, `$database.url` 등
+
+**참고**: 변수명은 점(.)을 포함할 수 있습니다 (예: `app.name`, `database.url`).
+
+#### 예시
+
+**var-map.properties:**
+```properties
+app.name=MyApplication
+app.version=1.0.0
+```
+
+**prepare goal 실행 후 outputFile (rewrite.yml) - 변수 placeholder 유지:**
+```yaml
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: com.example.Main
+displayName: Main Recipe
+description: Main recipe for ${app.name} migration
+recipeList:
+  - org.openrewrite.text.ChangeText
+```
+
+**resolve goal 실행 후 outputFile (rewrite.yml) - 변수 치환됨:**
+```yaml
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: com.example.Main
+displayName: Main Recipe
+description: Main recipe for MyApplication migration
+recipeList:
+  - org.openrewrite.text.ChangeText
+```
+
+#### 처리 순서
+
+1. `var-map.properties` 파일을 읽어서 변수 맵을 생성합니다.
+2. `outputFile`에서 `${variable}` 또는 `$variable` 패턴을 찾아서 치환합니다.
+3. 치환된 내용을 `outputFile`에 저장합니다.
+
+**주의사항:**
+- 변수를 찾을 수 없으면 경고를 출력하고 원본 변수를 유지합니다.
+- `outputFile`이 존재하지 않으면 경고를 출력하고 종료합니다. `prepare` goal을 먼저 실행해야 합니다.
+- 변수 치환은 `outputFile`을 직접 수정하므로, `prepare` goal에서 생성된 파일이 변경됩니다.
+
 ## merge-rules.yml 설정
 
 `merge-rules.yml` 파일은 프로젝트의 `groupId`와 `artifactId`에 따라 어떤 recipe 파일들을 병합하고 어떻게 `recipeList`를 업데이트할지 정의합니다.
@@ -315,14 +422,23 @@ recipeList:
 
 플러그인은 다음 순서로 작업을 수행합니다:
 
+### prepare goal 처리 순서
+
 1. **규칙 매칭**: 프로젝트의 `groupId`, `artifactId`와 매칭되는 규칙을 찾습니다.
 2. **파일 병합**: 매칭된 모든 규칙의 `mergeFiles`를 병합합니다 (중복 파일은 스킵).
    - 첫 번째 파일(일반적으로 `base.yml`)은 기본 레시피 정의와 트리거 recipe를 정의합니다.
    - 이후 파일들(`my-service.yml`, `common.yml` 등)은 `base.yml`에 머지되어 최종 실행 recipe를 만드는 용도입니다.
+   - **중요**: 변수 placeholder(`${variable}`, `$variable`)는 그대로 유지됩니다.
 3. **recipeList 업데이트**: 병합된 파일들에서 `org.yourcompany.openrewrite/v1/merge` 타입을 찾아 `recipeList`를 업데이트합니다.
    - `base.yml`에는 `org.yourcompany.openrewrite/v1/merge` 타입을 포함하지 않습니다.
    - 머지 파일들(`my-service.yml`, `common.yml` 등)에 포함된 `org.yourcompany.openrewrite/v1/merge` 타입의 규칙이 순서대로 적용됩니다.
-4. **결과 출력**: `org.yourcompany.openrewrite/v1/merge` 타입은 제외하고 모든 `specs.openrewrite.org/v1beta/recipe` 타입의 정의만 `outputFile`에 저장합니다.
+4. **결과 출력**: `org.yourcompany.openrewrite/v1/merge` 타입은 제외하고 모든 `specs.openrewrite.org/v1beta/recipe` 타입의 정의만 `outputFile`에 저장합니다. **변수 placeholder는 유지됩니다.**
+
+### resolve goal 처리 순서
+
+1. **변수 맵 로드**: `var-map.properties` 파일을 읽어서 변수 맵을 생성합니다.
+2. **변수 치환**: `outputFile`에서 `${variable}` 또는 `$variable` 패턴을 찾아서 치환합니다.
+3. **결과 저장**: 치환된 내용을 `outputFile`에 저장합니다.
 
 ## 프로젝트 구조 예시
 
@@ -331,7 +447,8 @@ project/
 ├── pom.xml
 ├── migration-ci/
 │   ├── rules/
-│   │   └── merge-rules.yml      # 머지 규칙 파일
+│   │   ├── merge-rules.yml      # 머지 규칙 파일
+│   │   └── var-map.properties   # 변수 맵 파일 (resolve goal에서 사용)
 │   └── recipes/
 │       ├── base.yml             # 기본 레시피 정의 및 트리거 recipe
 │       ├── my-service.yml       # base.yml에 머지되는 파일 (서비스별 recipe)
