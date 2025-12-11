@@ -1,4 +1,4 @@
-package com.yourcompany.plugins.rewriteprepare;
+package com.yourcompany.plugins;
 
 import java.io.File;
 import java.util.ArrayList;

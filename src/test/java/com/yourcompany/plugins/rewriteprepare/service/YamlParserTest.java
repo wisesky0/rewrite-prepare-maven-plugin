@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -85,7 +86,7 @@ class YamlParserTest {
         recipe.setName("com.example.TestRecipe");
         recipe.setDisplayName("Test Recipe");
 
-        List<RecipeDefinition> recipes = List.of(recipe);
+        List<RecipeDefinition> recipes = Arrays.asList(recipe);
         yamlParser.writeRecipes(recipes, outputFile);
 
         assertTrue(outputFile.exists());
@@ -269,7 +270,7 @@ class YamlParserTest {
         // displayName, description, tags, estimatedEffortPerOccurrence, 
         // causesAnotherCycle, preconditions, exclusions, recipeList는 null로 설정
 
-        List<RecipeDefinition> recipes = List.of(recipe);
+        List<RecipeDefinition> recipes = Arrays.asList(recipe);
         yamlParser.writeRecipes(recipes, outputFile);
 
         assertTrue(outputFile.exists());
@@ -318,7 +319,7 @@ class YamlParserTest {
         recipe.setExclusions(new java.util.ArrayList<>());
         recipe.setRecipeList(new java.util.ArrayList<>());
 
-        List<RecipeDefinition> recipes = List.of(recipe);
+        List<RecipeDefinition> recipes = Arrays.asList(recipe);
         yamlParser.writeRecipes(recipes, outputFile);
 
         assertTrue(outputFile.exists());
